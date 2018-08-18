@@ -14,16 +14,58 @@ var db = new JsonDB("myDataBase", true, false);
 const app = express();
 app.get('/', (req, res) => {
     res.send('Hello world\n');
+
 });
 
-app.get('/save/:key/:value', (req, res) => {
-    db.push("/" + req.params.key, req.params.value)
-    res.send("I write " + req.params.value + " under " + req.params.key)
+app.get('/setup', (req, res) => {
+    db.delete("/");
+    db.push("/users[]", { "id": "k", "name": "K", "real_name": "KK", });
+    db.push("/questions[]", {
+        "id": "1",
+        "author_id": "k",
+        "question": "Pierwsze pytanie testowe",
+        "answers": [
+            { "id": "1", "answer": "Tak", "responders": ["k"] },
+            { "id": "2", "answer": "Nie", "responders": [] }
+        ]
+    });
+    res.send('I\'m ready');
 });
 
-app.get('/read/:key', (req, res) => {
-    var value = db.getData("/" + req.params.key)
-    res.send("I read " + value + " from " + req.params.key)
+app.get('/users', (req, res) => {
+    var value = db.getData("/users")
+    res.send(value)
+});
+
+app.get('/users/:key', (req, res) => {
+    var users = db.getData("/users");
+    var i;
+    var len = users.length;
+    for (i = 0; i < len; i++) {
+        if (users[i]["id"] == req.params.key) {
+            res.send(users[i])
+            break;
+        }
+    } 
+    res.status(500).send("Item not found");
+});
+
+app.get('/questions', (req, res) => {
+    var value = db.getData("/questions")
+    res.send(value)
+});
+
+app.get('/questions/:key', (req, res) => {
+    var questions = db.getData("/questions");
+    var i;
+    var len = questions.length;
+    for (i = 0; i < len; i++) {
+        if (questions[i]["id"] == req.params.key) {
+            res.send(questions[i])
+            break;
+        }
+    } 
+    res.status(500).send("Item not found");
 });
 
 app.listen(PORT, HOST);
